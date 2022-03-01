@@ -25,19 +25,15 @@ const getUniqueImageId = () => {
 };
 
 // Объект author
-const author = () => {
-  return {
-    avatar: getUniqueImageId (),
-  };
-};
+const author = () => ({
+  avatar: getUniqueImageId (),
+});
 
 // Объект location
-const coordinates = () => {
-  return {
-    lat: getRandomFloat (35.65000, 35.70000, 5),
-    lng: getRandomFloat (139.70000, 139.80000, 5),
-  };
-};
+const coordinates = () => ({
+  lat: getRandomFloat (35.65000, 35.70000, 5),
+  lng: getRandomFloat (139.70000, 139.80000, 5),
+});
 
 // Объект offer
 const TYPES = ['palace', 'flat', 'house', 'bungalow', 'hotel'];
@@ -60,30 +56,28 @@ const createRandomUniqArray = (array) => {
   return arrayNew;
 };
 
-const offer = () => {
-  return {
-    title: 'Выгодное Кексопредложение',
-    address: coordinates,
-    price: getRandomInt(100, 3000),
-    type: getRandomArrayElement(TYPES),
-    rooms: getRandomInt(1, 5),
-    guests: getRandomInt(1, 20),
-    checkin: getRandomArrayElement(TIMES),
-    checkout: getRandomArrayElement(TIMES),
-    features: createRandomUniqArray(COMFORT),
-    description: 'Кексономера со всеми удобствами для котов',
-    photos: createRandomUniqArray(SNAPSHOTS),
-  };
-};
+const offer = () => ({
+  title: 'Выгодное Кексопредложение',
+  address: coordinates (),
+  price: getRandomInt(100, 3000),
+  type: getRandomArrayElement(TYPES),
+  rooms: getRandomInt(1, 5),
+  guests: getRandomInt(1, 20),
+  checkin: getRandomArrayElement(TIMES),
+  checkout: getRandomArrayElement(TIMES),
+  features: createRandomUniqArray(COMFORT),
+  description: 'Кексономера со всеми удобствами для котов',
+  photos: createRandomUniqArray(SNAPSHOTS),
+});
 
 // Массив из раннее описанных объектов
-const hotel = () => {
-  return {
-    author: author (),
-    coordinates: coordinates (),
-    offer: offer (),
-  };
-};
+const hotel = () => ({
+  author: author (),
+  coordinates: coordinates (),
+  offer: offer (),
+});
 
 // Массив из 10 сгенерированных JS-объектов
-const hotelsArr = Array.from({length: 10}, hotel);
+const hotelsArr = () => Array.from({length: 10}, hotel);
+
+hotelsArr();
