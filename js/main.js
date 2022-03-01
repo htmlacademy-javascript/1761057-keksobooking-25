@@ -25,7 +25,7 @@ const getUniqueImageId = () => {
 };
 
 // Объект author
-const author = () =>{
+const author = () => {
   return {
     avatar: getUniqueImageId (),
   };
@@ -51,7 +51,7 @@ const SNAPSHOTS = [
 
 const getRandomArrayElement = (elements) => elements[getRandomInt(0, elements.length - 1)];
 
-const createRandomUniqArray = (array) =>{
+const createRandomUniqArray = (array) => {
   const arr = Array.from(array);
   const arrayNew = new Array(getRandomInt(1, arr.length));
   for (let i = 0; i < arrayNew.length; i++ ){
