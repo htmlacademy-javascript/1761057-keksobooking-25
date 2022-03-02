@@ -31,8 +31,6 @@ const coordinates = () => ({
   lng: getRandomFloat(139.70000, 139.80000, 5),
 });
 
-const coordinatesAddress = `${coordinates().lat}, ${coordinates().lng}`;
-
 // Объект offer
 const TYPES = ['palace', 'flat', 'house', 'bungalow', 'hotel'];
 const TIMES = ['12:00', '13:00', '14:00'];
@@ -48,7 +46,7 @@ const getRandomArrayElement = (elements) => elements[getRandomInt(0, elements.le
 const createRandomUniqArray = (array) => {
   const arr = Array.from(array);
   const arrayNew = new Array(getRandomInt(1, arr.length));
-  for (let i = 0; i < arrayNew.length; i++ ){
+  for (let i = 0; i < arrayNew.length; i++) {
     arrayNew[i]=arr.splice(getRandomInt(0, arr.length - 1), 1).join();
   }
   return arrayNew;
@@ -56,7 +54,7 @@ const createRandomUniqArray = (array) => {
 
 const offer = () => ({
   title: 'Выгодное Кексопредложение',
-  address: coordinatesAddress,
+  address: `${coordinates().lat}, ${coordinates().lng}`,
   price: getRandomInt(100, 3000),
   type: getRandomArrayElement(TYPES),
   rooms: getRandomInt(1, 5),
@@ -79,5 +77,3 @@ const hotel = () => ({
 const hotelsArr = () => Array.from({length: 10}, hotel);
 
 hotelsArr();
-
-
