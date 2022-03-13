@@ -20,7 +20,7 @@ const createRandomUniqueArr = (array) => {
   const arr = Array.from(array);
   const arrayNew = new Array(getRandomInt(1, arr.length));
   for (let i = 0; i < arrayNew.length; i++) {
-    arrayNew[i]=arr.splice(getRandomInt(0, arr.length - 1), 1).join();
+    arrayNew[i] = arr.splice(getRandomInt(0, arr.length - 1), 1).join();
   }
   return arrayNew;
 };
