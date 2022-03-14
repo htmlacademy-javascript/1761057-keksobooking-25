@@ -1,50 +1,27 @@
 /*
 
-const formDeclaration = document.querySelector('.ad-form');
-const formElements = document.querySelectorAll('fieldset');
-const formslider = document.querySelector('.ad-form__slider');
+const adForm = document.querySelector('.ad-form');
+const formElements = document.querySelectorAll('fieldset, .map__filter');
 const mapFilters = document.querySelector('.map__filters');
-const mapFilter = document.querySelectorAll('.map__filter');
-const mapFeatures = document.querySelector('.map__features');
 
-const formDisabled = (elements, slider) => {
-  elements.forEach((element) => {
-    element.disabled = true;
-    slider.disabled = true;
-  });
+const formslider = document.querySelector('.ad-form__slider');
+
+const setDisabledState = () => {
+  formElements.forEarch((item) => item.disabled = !item.disabled)
 };
 
-function formNotDisabled(elements, slider) {
-  elements.forEach((element) => {
-    element.disabled = false;
-    slider.disabled = false;
-  });
-}
-
-// Функция добавления класса и атрибута в неактивном состоянии для формы объявления
-const addFormClass = (form) => {
-  if (!form.classList.contains('ad-form--disabled')) {
-    form.classList.add('ad-form--disabled');
-    formDisabled(formElements, formslider);
-  } else {
-    form.classList.remove('ad-form--disabled');
-    formNotDisabled(formElements, formslider);
-  }
+const setActiveState = () => {
+  adForm.classList.remove('ad-form--disabled');
+  mapFilters.classList.remove('map__filters--disabled')
+  etDisabledState();
 };
 
-addFormClass(formDeclaration);
-
-// Функция добавления класса и атрибута в неактивном состоянии для фильтрации объявления
-const addMapFormClass = (form) => {
-  if (!form.classList.contains('ad-form--disabled')) {
-    form.classList.add('ad-form--disabled');
-    formDisabled(mapFilter, mapFeatures);
-  } else {
-    form.classList.remove('ad-form--disabled');
-    formNotDisabled(mapFilter, mapFeatures);
-  }
+const setInactiveState = () => {
+  adForm.classList.add('ad-form--disabled');
+  mapFilters.classList.add('map__filters--disabled')
+  etDisabledState();
 };
 
-addMapFormClass(mapFilters);
+export {setActiveState, setInactiveState};
 
 */

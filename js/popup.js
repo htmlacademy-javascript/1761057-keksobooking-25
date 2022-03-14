@@ -1,12 +1,5 @@
 import {hotelsArr} from './data.js';
 
-const cardHotel = document.querySelector('#map-canvas');
-const cardTemplate = document.querySelector('#card')
-  .content
-  .querySelector('.popup');
-
-const similarCards = hotelsArr(1);
-
 // Функция сопоставления элемента массива с ключом объекта
 const TYPES_TRANSLATE = {
   palace: 'Дворец',
@@ -22,9 +15,15 @@ const getValue = (array, type) => {
   }
 };
 
+const cardHotel = document.querySelector('#map-canvas');
+const cardTemplate = document.querySelector('#card')
+  .content
+  .querySelector('.popup');
+
+const similarCards = hotelsArr(1);
+
 //Функция для отображения удобств в номере
 const featuresContainer = cardTemplate.querySelector('.popup__features');
-const featureList = featuresContainer.querySelectorAll('.popup__feature');
 
 const getRandomFeatures = (array, list) => {
   if (!array) {
@@ -41,17 +40,14 @@ const getRandomFeatures = (array, list) => {
 };
 
 // Функция для фото
-const photosContainer = cardTemplate.querySelector('.popup__photos');
-const photoItem = photosContainer.querySelector('.popup__photo');
-
 const fragment = document.createDocumentFragment();
 
-const getRandomPhotos = (array) => {
-  if (array.length === 0) {
-    photosContainer.style.display='none';
+const getRandomPhotos = (array, container, element) => {
+  if (!array) {
+    container.remove();
   } else {
     array.forEach((arrayItem) => {
-      const photoFragment = photoItem.cloneNode(true);
+      const photoFragment = element.cloneNode(true);
       photoFragment.src = arrayItem;
       fragment.appendChild(photoFragment);
     });
@@ -59,11 +55,17 @@ const getRandomPhotos = (array) => {
   return fragment;
 };
 
-// Функция, проверяющая наличие описания номера
-const descriptionContainer = cardTemplate.querySelector('.popup__description');
-const getRandomDescription = (text) => {
-  if (text === '') {descriptionContainer.style.display='none';}
-  return text;
+// Функция проверки на недостающие данные
+const checkDataMissing = (data, element) => {
+  if (data && !data.includes('undefined')) {
+    if (data.indexOf('.png') >= 0) {
+      element.src = data;
+    } else {
+      element.textContent = data;
+    }
+  } else {
+    element.remove();
+  }
 };
 
 // Функция генерации разметки похожих элементов
@@ -72,18 +74,21 @@ const getRandomCard = () => {
 
   similarCards.forEach(({author, offer}) => {
     const cardElement = cardTemplate.cloneNode(true);
+    const featureList = cardElement.querySelectorAll('.popup__feature');
+    const photosContainer = cardElement.querySelector('.popup__photos');
+    const photoItem = cardElement.querySelector('.popup__photo');
 
-    cardElement.querySelector('.popup__title').textContent = offer.title;
-    cardElement.querySelector('.popup__text--address').textContent = offer.address;
-    cardElement.querySelector('.popup__text--price').textContent = `${offer.price} ₽/ночь`;
-    cardElement.querySelector('.popup__type').textContent = getValue(TYPES_TRANSLATE, offer.type);
-    cardElement.querySelector('.popup__text--capacity').textContent = `${offer.rooms} комнаты для ${offer.guests} гостей`;
-    cardElement.querySelector('.popup__text--time').textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
+    checkDataMissing(offer.title, cardElement.querySelector('.popup__title'));
+    checkDataMissing(offer.address, cardElement.querySelector('.popup__text--address'));
+    checkDataMissing(`${offer.price} ₽/ночь`, cardElement.querySelector('.popup__text--price'));
+    checkDataMissing(getValue(TYPES_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
+    checkDataMissing(`${offer.rooms} комнаты для ${offer.guests} гостей`, cardElement.querySelector('.popup__text--capacity'));
+    checkDataMissing(`Заезд после ${offer.checkin}, выезд до ${offer.checkout}`, cardElement.querySelector('.popup__text--time'));
     getRandomFeatures(offer.features, featureList);
-    cardElement.querySelector('.popup__description').textContent = getRandomDescription(offer.description);
+    checkDataMissing(offer.description, cardElement.querySelector('.popup__description'));
     cardElement.querySelector('.popup__photos').innerHTML = '';
-    cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos));
-    cardElement.querySelector('.popup__avatar').src = `img/avatars/user${  author.avatar  }.png`;
+    cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos, photosContainer, photoItem));
+    checkDataMissing(`img/avatars/user${author.avatar}.png`, cardElement.querySelector('.popup__avatar'));
 
     cardHotelFragment.appendChild(cardElement);
   });
