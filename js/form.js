@@ -19,6 +19,7 @@ const setInactiveState = () => {
 };
 
 // Валидация
+// Заголовок
 const pristine = new Pristine(adForm, {
   classTo: 'ad-form__element',
   errorClass: 'ad-form__item--invalid',
@@ -34,6 +35,7 @@ adForm.addEventListener('submit', (evt) => {
   return true;
 });
 
+// Количество комнат - количество гостей
 const roomService = {
   '1': ['1'],
   '2': ['1', '2'],
@@ -43,6 +45,7 @@ const roomService = {
 
 const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
+
 const roomValidate = (value) => {
   if (roomNumber.value.length && roomService[roomNumber.value].includes(value)) {
     return true;
@@ -68,6 +71,56 @@ pristine.addValidator(guest, roomValidate, getServiceErrorMessage);
 
 roomNumber.addEventListener('change', (evt) => {
   evt.preventDefault();
+  pristine.validate();
+});
+
+// Заезд - выезд
+const timeIn = adForm.querySelector('#timein');
+const timeOut = adForm.querySelector('#timeout');
+const time = adForm.querySelector('.ad-form__element--time select');
+
+time.addEventListener('change', () => {
+  timeOut.value = timeIn.value;
+});
+
+timeOut.addEventListener('change', () => {
+  timeIn.value = timeOut.value;
+});
+
+// Тип жилья - цена
+const lodgingService = {
+  'bungalow': 0,
+  'flat': 1000,
+  'hotel': 3000,
+  'house': 5000,
+  'palace': 10000
+};
+
+const typeLodging = adForm.querySelector('#type');
+const price = adForm.querySelector('#price');
+
+const checkMinPrice = () => {
+  if (Number(price.value) <= Number(price.placeholder)) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
+const getPriceErrorMessage = () => `Минимальная стоимость ${price.placeholder} рублей`;
+
+pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
+price.addEventListener('change', () => {
+  pristine.validate();
+});
+
+const typeValidate = (value) => {
+  price.placeholder = lodgingService[value];
+};
+
+pristine.addValidator(typeLodging, typeValidate);
+
+typeLodging.addEventListener('change', () => {
   pristine.validate();
 });
 
