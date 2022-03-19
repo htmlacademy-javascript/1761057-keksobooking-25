@@ -19,7 +19,6 @@ const setInactiveState = () => {
 };
 
 // Валидация
-// Заголовок
 const pristine = new Pristine(adForm, {
   classTo: 'ad-form__element',
   errorClass: 'ad-form__item--invalid',
@@ -29,14 +28,8 @@ const pristine = new Pristine(adForm, {
   errorTextClass: 'ad-form__error'
 });
 
-adForm.addEventListener('submit', (evt) => {
-  evt.preventDefault();
-  pristine.validate();
-  return true;
-});
-
 // Количество комнат - количество гостей
-const roomService = {
+const ROOOM_SERVICE = {
   '1': ['1'],
   '2': ['1', '2'],
   '3': ['1', '2', '3'],
@@ -46,31 +39,27 @@ const roomService = {
 const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
 
-const roomValidate = (value) => {
-  if (roomNumber.value.length && roomService[roomNumber.value].includes(value)) {
-    return true;
+// Проверка на склонение существительных
+const numDecline = (num) => {
+  num = num % 100;
+  if (num > 19) {
+    num = num % 10;
+  }
+
+  if (num === 1) {
+    return 'гостя';
   } else {
-    return false;
+    return 'гостей';
   }
 };
 
-const getServiceErrorMessage = () => {
-  switch (roomNumber.value) {
-    case '1':
-      return 'Для 1 гостя';
-    case '2':
-      return 'Для 2 гостей или для 1 гостя';
-    case '3':
-      return 'Для 3 гостей, для 2 гостей или для 1 гостя';
-    case '100':
-      return 'Не для гостей';
-  }
-};
+const validateRoomNumber = (value) => roomNumber.value.length && ROOOM_SERVICE[roomNumber.value].includes(value);
+const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
 
-pristine.addValidator(guest, roomValidate, getServiceErrorMessage);
+pristine.addValidator(guest, validateRoomNumber, getServiceErrorMessage);
+pristine.addValidator(roomNumber, validateRoomNumber);
 
-roomNumber.addEventListener('change', (evt) => {
-  evt.preventDefault();
+roomNumber.addEventListener('change', () => {
   pristine.validate();
 });
 
@@ -88,7 +77,7 @@ timeOut.addEventListener('change', () => {
 });
 
 // Тип жилья - цена
-const lodgingService = {
+const MIN_HOUSE_PRICE = {
   'bungalow': 0,
   'flat': 1000,
   'hotel': 3000,
@@ -96,32 +85,27 @@ const lodgingService = {
   'palace': 10000
 };
 
-const typeLodging = adForm.querySelector('#type');
 const price = adForm.querySelector('#price');
+const typeHousing = adForm.querySelector('#type');
 
-const checkMinPrice = () => {
-  if (Number(price.value) <= Number(price.placeholder)) {
-    return false;
+const validateMinPrice = () => {
+  price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
+  pristine.validate();
+};
+
+typeHousing.addEventListener('change', validateMinPrice);
+
+const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
+const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
+pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
+
+// Отправка формы
+adForm.addEventListener('submit', (evt) => {
+  if (!pristine.validate()){
+    evt.preventDefault();
   } else {
     return true;
   }
-};
-
-const getPriceErrorMessage = () => `Минимальная стоимость ${price.placeholder} рублей`;
-
-pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
-price.addEventListener('change', () => {
-  pristine.validate();
-});
-
-const typeValidate = (value) => {
-  price.placeholder = lodgingService[value];
-};
-
-pristine.addValidator(typeLodging, typeValidate);
-
-typeLodging.addEventListener('change', () => {
-  pristine.validate();
 });
 
 export {setActiveState, setInactiveState};
