@@ -28,13 +28,8 @@ const pristine = new Pristine(adForm, {
   errorTextClass: 'ad-form__error'
 });
 
-adForm.addEventListener('submit', (evt) => {
-  evt.preventDefault();
-  pristine.validate();
-  return true;
-});
-
-const roomService = {
+// Количество комнат - количество гостей
+const ROOOM_SERVICE = {
   '1': ['1'],
   '2': ['1', '2'],
   '3': ['1', '2', '3'],
@@ -43,32 +38,74 @@ const roomService = {
 
 const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
-const roomValidate = (value) => {
-  if (roomNumber.value.length && roomService[roomNumber.value].includes(value)) {
-    return true;
+
+// Проверка на склонение существительных
+const numDecline = (num) => {
+  num = num % 100;
+  if (num > 19) {
+    num = num % 10;
+  }
+
+  if (num === 1) {
+    return 'гостя';
   } else {
-    return false;
+    return 'гостей';
   }
 };
 
-const getServiceErrorMessage = () => {
-  switch (roomNumber.value) {
-    case '1':
-      return 'Для 1 гостя';
-    case '2':
-      return 'Для 2 гостей или для 1 гостя';
-    case '3':
-      return 'Для 3 гостей, для 2 гостей или для 1 гостя';
-    case '100':
-      return 'Не для гостей';
-  }
-};
+const validateRoomNumber = (value) => roomNumber.value.length && ROOOM_SERVICE[roomNumber.value].includes(value);
+const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
 
-pristine.addValidator(guest, roomValidate, getServiceErrorMessage);
+pristine.addValidator(guest, validateRoomNumber, getServiceErrorMessage);
+pristine.addValidator(roomNumber, validateRoomNumber);
 
-roomNumber.addEventListener('change', (evt) => {
-  evt.preventDefault();
+roomNumber.addEventListener('change', () => {
   pristine.validate();
+});
+
+// Заезд - выезд
+const timeIn = adForm.querySelector('#timein');
+const timeOut = adForm.querySelector('#timeout');
+const time = adForm.querySelector('.ad-form__element--time select');
+
+time.addEventListener('change', () => {
+  timeOut.value = timeIn.value;
+});
+
+timeOut.addEventListener('change', () => {
+  timeIn.value = timeOut.value;
+});
+
+// Тип жилья - цена
+const MIN_HOUSE_PRICE = {
+  'bungalow': 0,
+  'flat': 1000,
+  'hotel': 3000,
+  'house': 5000,
+  'palace': 10000
+};
+
+const price = adForm.querySelector('#price');
+const typeHousing = adForm.querySelector('#type');
+
+const validateMinPrice = () => {
+  price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
+  pristine.validate();
+};
+
+typeHousing.addEventListener('change', validateMinPrice);
+
+const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
+const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
+pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
+
+// Отправка формы
+adForm.addEventListener('submit', (evt) => {
+  if (!pristine.validate()){
+    evt.preventDefault();
+  } else {
+    return true;
+  }
 });
 
 export {setActiveState, setInactiveState};
