@@ -364,10 +364,6 @@ fieldset {
   padding-bottom: 5px;
 }
 
-.ad-form__error {
-  color: #ff5635;
-}
-
 .ad-form__element input,
 .ad-form__element select,
 .ad-form__element textarea {
@@ -409,6 +405,31 @@ fieldset {
 
 .ad-form__element--time select:first-of-type {
   margin-right: 14px;
+}
+
+.ad-form__slider.noUi-target:not(#fake-id) {
+  width: calc(100% - 20px);
+  height: 5px;
+  transform: translateY(-2px);
+}
+
+.ad-form__slider:not(#fake-id) .noUi-connect {
+  background-color: #353535;
+}
+
+.ad-form__slider:not(#fake-id) .noUi-handle {
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  right: -5px;
+  top: -5px;
+  cursor: grab;
+  background-color: #999999;
+}
+
+.ad-form__slider:not(#fake-id) .noUi-handle::after,
+.ad-form__slider:not(#fake-id) .noUi-handle::before {
+  display: none;
 }
 
 .features legend {
