@@ -4,5 +4,6 @@ import {setActiveState, setInactiveState} from './form.js';
 
 hotelsArr(10);
 getRandomCard();
+
 setActiveState();
 setInactiveState();
