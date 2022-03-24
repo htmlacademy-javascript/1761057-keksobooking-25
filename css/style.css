@@ -414,7 +414,7 @@ fieldset {
 }
 
 .ad-form__slider:not(#fake-id) .noUi-connect {
-  background-color: #353535;
+  background-color: #ff5635;
 }
 
 .ad-form__slider:not(#fake-id) .noUi-handle {

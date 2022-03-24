@@ -20,8 +20,6 @@ const cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.popup');
 
-const similarCards = hotelsArr(1);
-
 //Функция для отображения удобств в номере
 const featuresContainer = cardTemplate.querySelector('.popup__features');
 
@@ -68,9 +66,32 @@ const checkDataMissing = (data, element) => {
   }
 };
 
+const similarCards = ({author, coordinates, offer}) => {
+  const cardElement = cardTemplate.cloneNode(true);
+  const featureList = cardElement.querySelectorAll('.popup__feature');
+  const photosContainer = cardElement.querySelector('.popup__photos');
+  const photoItem = cardElement.querySelector('.popup__photo');
+
+  checkDataMissing(offer.title, cardElement.querySelector('.popup__title'));
+  checkDataMissing(`${coordinates['lat']}, ${coordinates['lng']}`, cardElement.querySelector('.popup__text--address'));
+  checkDataMissing(`${offer.price} ₽/ночь`, cardElement.querySelector('.popup__text--price'));
+  checkDataMissing(getValue(TYPES_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
+  checkDataMissing(`${offer.rooms} комнаты для ${offer.guests} гостей`, cardElement.querySelector('.popup__text--capacity'));
+  checkDataMissing(`Заезд после ${offer.checkin}, выезд до ${offer.checkout}`, cardElement.querySelector('.popup__text--time'));
+  getRandomFeatures(offer.features, featureList);
+  checkDataMissing(offer.description, cardElement.querySelector('.popup__description'));
+  cardElement.querySelector('.popup__photos').innerHTML = '';
+  cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos, photosContainer, photoItem));
+  checkDataMissing(`img/avatars/user${author.avatar}.png`, cardElement.querySelector('.popup__avatar'));
+
+  return cardElement;
+};
+
+export {similarCards};
+
 // Функция генерации разметки похожих элементов
-const getRandomCard = () => {
-  const cardHotelFragment = document.createDocumentFragment();
+/*const getRandomCard = () => {
+  //const cardHotelFragment = document.createDocumentFragment();
 
   similarCards.forEach(({author, offer}) => {
     const cardElement = cardTemplate.cloneNode(true);
@@ -90,10 +111,11 @@ const getRandomCard = () => {
     cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos, photosContainer, photoItem));
     checkDataMissing(`img/avatars/user${author.avatar}.png`, cardElement.querySelector('.popup__avatar'));
 
-    cardHotelFragment.appendChild(cardElement);
+    //cardHotelFragment.appendChild(cardElement);
   });
 
-  cardHotel.appendChild(cardHotelFragment);
-};
+  //cardHotel.appendChild(cardHotelFragment);
+  return similarCards;
+};*/
 
-export {getRandomCard};
+

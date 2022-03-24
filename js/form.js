@@ -99,6 +99,39 @@ const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
 const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
 pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
 
+// Слайдер с ценой
+const sliderElement = adForm.querySelector('.ad-form__slider');
+const valueSlider = adForm.querySelector('#price');
+
+noUiSlider.create(sliderElement, {
+  range: {
+    min: 0,
+    max: 100000,
+  },
+  start: 5000,
+  step: 1,
+  connect: 'lower',
+  format: {
+    to: function (value) {
+      if (Number.isInteger(value)) {
+        return value.toFixed(0);
+      }
+      return value.toFixed(0);
+    },
+    from: function (value) {
+      return parseFloat(value);
+    },
+  },
+});
+
+sliderElement.noUiSlider.on('slide', () => {
+  valueSlider.value = sliderElement.noUiSlider.get();
+});
+
+valueSlider.addEventListener('input', () => {
+  sliderElement.noUiSlider.set(valueSlider.value);
+});
+
 // Отправка формы
 adForm.addEventListener('submit', (evt) => {
   if (!pristine.validate()){
