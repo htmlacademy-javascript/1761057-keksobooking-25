@@ -44,6 +44,6 @@ const hotel = () => ({
 });
 
 // Массив из 'n' сгенерированных JS-объектов
-const hotelsArr = (count) => Array.from({length: count}, hotel);
+const hotelsArr = Array.from({length: 10}, hotel);
 
 export {hotelsArr};
