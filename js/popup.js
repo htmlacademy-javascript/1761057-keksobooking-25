@@ -63,14 +63,14 @@ const checkDataMissing = (data, element) => {
   }
 };
 
-const similarCards = ({author, coordinates, offer}) => {
+const similarCards = ({author, offer}) => {
   const cardElement = cardTemplate.cloneNode(true);
   const featureList = cardElement.querySelectorAll('.popup__feature');
   const photosContainer = cardElement.querySelector('.popup__photos');
   const photoItem = cardElement.querySelector('.popup__photo');
 
   checkDataMissing(offer.title, cardElement.querySelector('.popup__title'));
-  checkDataMissing(`${coordinates['lat']}, ${coordinates['lng']}`, cardElement.querySelector('.popup__text--address'));
+  checkDataMissing(offer.address, cardElement.querySelector('.popup__text--address'));
   checkDataMissing(`${offer.price} ₽/ночь`, cardElement.querySelector('.popup__text--price'));
   checkDataMissing(getValue(TYPES_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
   checkDataMissing(`${offer.rooms} комнаты для ${offer.guests} гостей`, cardElement.querySelector('.popup__text--capacity'));
@@ -79,7 +79,7 @@ const similarCards = ({author, coordinates, offer}) => {
   checkDataMissing(offer.description, cardElement.querySelector('.popup__description'));
   cardElement.querySelector('.popup__photos').innerHTML = '';
   cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos, photosContainer, photoItem));
-  checkDataMissing(`img/avatars/user${author.avatar}.png`, cardElement.querySelector('.popup__avatar'));
+  checkDataMissing(author.avatar, cardElement.querySelector('.popup__avatar'));
 
   return cardElement;
 };

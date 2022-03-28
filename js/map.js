@@ -1,4 +1,3 @@
-import {hotelsArr} from './data.js';
 import {similarCards} from './popup.js';
 
 const data = {lat: 35.6895, lng: 139.69171};
@@ -8,10 +7,7 @@ const map = L.map('map-canvas')
   .on('load', () => {
     address.value = `${data['lat']}, ${data['lng']}`;
   })
-  .setView({
-    lat: 35.6895,
-    lng: 139.69171,
-  }, 12.45);
+  .setView(data, 12.45);
 
 L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -27,15 +23,18 @@ const mainPinIcon = L.icon({
 });
 
 const marker = L.marker(
-  {
-    lat: 35.6895,
-    lng: 139.69171,
-  },
+  data,
   {
     draggable: true,
     icon: mainPinIcon,
   },
 ).addTo(map);
+
+const setDefaultMarker = () => {
+  const newLatLng = new L.LatLng(35.6895, 139.69171);
+  marker.setLatLng(newLatLng);
+  address.value = `${newLatLng['lat']}, ${newLatLng['lng']}`;
+};
 
 marker.on('moveend', (evt) => {
   const points = evt.target.getLatLng();
@@ -48,9 +47,9 @@ const adPinIcon = L.icon({
   iconAnchor: [20, 40],
 });
 
-hotelsArr.forEach((hotel) => {
+const similarHotels = (hotel) => {
   const {
-    coordinates: {
+    location: {
       lat,
       lng
     }
@@ -60,13 +59,13 @@ hotelsArr.forEach((hotel) => {
     lng,
   },
   {
-    draggable: true,
     icon: adPinIcon,
   });
 
   adPin
     .addTo(map)
     .bindPopup(similarCards(hotel));
-});
+};
 
+export {similarHotels, setDefaultMarker};
 
