@@ -1,8 +1,12 @@
 import './popup.js';
 import {setFormSubmit} from './form.js';
-import './map.js';
 import {getData} from './api.js';
+import {similarHotels} from './map.js';
 
-getData();
+getData((data) => {
+  data.slice(0, 10).forEach((hotel) => {
+    similarHotels(hotel);
+  });
+});
+
 setFormSubmit();
-

@@ -1,17 +1,17 @@
-import {similarHotels} from './map.js';
-const getData = () => {
-  fetch('https://25.javascript.pages.academy/keksobooking/data')
+const DATA = 'https://25.javascript.pages.academy/keksobooking/data';
+const SERVER = 'https://25.javascript.pages.academy/keksobooking';
+
+const getData = (onSuccess) => {
+  fetch(DATA)
     .then((response) => response.json())
     .then((data) => {
-      data.slice(0, 10).forEach((hotel) => {
-        similarHotels(hotel);
-      });
+      onSuccess(data);
     });
 };
 
 const sendData = (onSuccess, onError, unBlockButton, body) => {
   fetch(
-    'https://25.javascript.pages.academy/keksobooking',
+    SERVER,
     {
       method: 'POST',
       body,
