@@ -1,10 +1,12 @@
-import {hotelsArr} from './data.js';
-import {similarCards} from './popup.js';
-import {setActiveState, setInactiveState} from './form.js';
-import './map.js';
+import './popup.js';
+import {setFormSubmit} from './form.js';
+import {getData} from './api.js';
+import {similarHotels} from './map.js';
 
-hotelsArr();
-similarCards();
+getData((data) => {
+  data.slice(0, 10).forEach((hotel) => {
+    similarHotels(hotel);
+  });
+});
 
-setActiveState();
-setInactiveState();
+setFormSubmit();
