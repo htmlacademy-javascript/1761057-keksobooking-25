@@ -64,6 +64,7 @@ const checkDataMissing = (data, element) => {
 };
 
 const similarCards = ({author, offer}) => {
+
   const cardElement = cardTemplate.cloneNode(true);
   const featureList = cardElement.querySelectorAll('.popup__feature');
   const photosContainer = cardElement.querySelector('.popup__photos');

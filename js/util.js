@@ -25,4 +25,14 @@ const createRandomUniqueArr = (array) => {
   return arrayNew;
 };
 
-export {getRandomInt, getRandomFloat, getRandomArrayElement, createRandomUniqueArr};
+// Устранение дребезга
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
+export {getRandomInt, getRandomFloat, getRandomArrayElement, createRandomUniqueArr, debounce};

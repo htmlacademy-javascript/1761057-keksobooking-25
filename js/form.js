@@ -221,6 +221,7 @@ const setFormSubmit = () => {
       sendData(
         () => getSuccessMessage(evt),
         () => getErrorMessage(),
+        () => 'POST',
         () => unblockSubmitButton(),
         formData);
     }
