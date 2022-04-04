@@ -4,34 +4,30 @@ const URL = {
 };
 
 
-const getData = (onSuccess) => {
+/*const getData = (onSuccess) => {
   fetch('https://25.javascript.pages.academy/keksobooking/data')
     .then((response) => response.json())
     .then((data) => {
       onSuccess(data);
     });
-};
+};*/
 
-const sendData = (onSuccess, onError, unBlockButton, body) => {
+const request = (onSuccess, onError, method, unBlockButton, body) => {
   fetch(
-    URL['POST'],
+    URL[method],
     {
-      method: 'POST',
-      body,
+      method: method,
+      body: body
     },
   )
-    .then((response) => {
-      if (response.ok) {
-        onSuccess();
-        unBlockButton();
-      } else {
-        onError();
-        unBlockButton();
-      }
+    .then((response) => response.json())
+    .then((data) => {
+      onSuccess(data);
+      unBlockButton();
     })
     .catch(() => {
       onError();
     });
 };
 
-export {getData, sendData};
+export {request};

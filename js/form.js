@@ -1,8 +1,8 @@
 import {setDefaultMarker} from './map.js';
-import {sendData} from './api.js';
+import {request} from './api.js';
 
 // Количество комнат - количество гостей
-const ROOOM_SERVICE = {
+const ROOM_SERVICE = {
   '1': ['1'],
   '2': ['1', '2'],
   '3': ['1', '2', '3'],
@@ -66,8 +66,8 @@ const numDecline = (num) => {
 const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
 
-const validateRoomNumber = (value) => roomNumber.value.length && ROOOM_SERVICE[roomNumber.value].includes(value);
-const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
+const validateRoomNumber = (value) => roomNumber.value.length && ROOM_SERVICE[roomNumber.value].includes(value);
+const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
 
 pristine.addValidator(guest, validateRoomNumber, getServiceErrorMessage);
 pristine.addValidator(roomNumber, validateRoomNumber);
@@ -146,6 +146,21 @@ price.addEventListener('input', () => {
   sliderElement.noUiSlider.set(price.value);
 });
 
+// Загрузка аватарки
+const FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+const preview = adForm.querySelector('.ad-form-header__preview img');
+const fileChooser = adForm.querySelector('.ad-form__field input[type=file]');
+
+fileChooser.addEventListener('change', () => {
+  const file = fileChooser.files[0];
+  const fileName = file.name.toLowerCase();
+
+  const matches = FILE_TYPES.some((it) => fileName.endsWith(it));
+  if (matches) {
+    preview.src = URL.createObjectURL(file);
+  }
+});
+
 // Очистка формы
 const resetForm = adForm.querySelector('.ad-form__reset');
 
@@ -218,14 +233,9 @@ const setFormSubmit = () => {
     if (pristine.validate()) {
       const formData = new FormData(evt.target);
       blockSubmitButton();
-      sendData(
-        () => getSuccessMessage(evt),
-        () => getErrorMessage(),
-        () => 'POST',
-        () => unblockSubmitButton(),
-        formData);
+      request(getSuccessMessage, getErrorMessage, 'POST', unblockSubmitButton, formData);
     }
   });
 };
 
-export {setActiveState, setInactiveState, setFormSubmit};
+export {setActiveState, setInactiveState, setFormSubmit, getErrorMessage, unblockSubmitButton};
