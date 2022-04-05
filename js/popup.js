@@ -18,20 +18,13 @@ const cardTemplate = document.querySelector('#card')
   .querySelector('.popup');
 
 //Функция для отображения удобств в номере
-const featuresContainer = cardTemplate.querySelector('.popup__features');
-
 const getRandomFeatures = (array, list) => {
-  if (!array) {
-    featuresContainer.remove();
-  } else {
-    list.forEach((featureListItem) => {
-      const isNeed = array.some(
-        (someComfort) => featureListItem.classList.contains(`popup__feature--${someComfort}`),
-      );
-
-      if (!isNeed) {featureListItem.remove();}
-    });
-  }
+  list.forEach((featureListItem) => {
+    const isNeed = array.some(
+      (someComfort) => featureListItem.classList.contains(`popup__feature--${someComfort}`),
+    );
+    if (!isNeed) {featureListItem.remove();}
+  });
 };
 
 // Функция для фото
@@ -66,7 +59,6 @@ const checkDataMissing = (data, element) => {
 const similarCards = ({author, offer}) => {
 
   const cardElement = cardTemplate.cloneNode(true);
-  const featureList = cardElement.querySelectorAll('.popup__feature');
   const photosContainer = cardElement.querySelector('.popup__photos');
   const photoItem = cardElement.querySelector('.popup__photo');
 
@@ -76,7 +68,13 @@ const similarCards = ({author, offer}) => {
   checkDataMissing(getValue(TYPES_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
   checkDataMissing(`${offer.rooms} комнаты для ${offer.guests} гостей`, cardElement.querySelector('.popup__text--capacity'));
   checkDataMissing(`Заезд после ${offer.checkin}, выезд до ${offer.checkout}`, cardElement.querySelector('.popup__text--time'));
-  getRandomFeatures(offer.features, featureList);
+
+  if (!offer.features) {
+    cardElement.querySelector('.popup__feature').remove();
+  } else {
+    getRandomFeatures(offer.features, cardElement.querySelectorAll('.popup__feature'));
+  }
+
   checkDataMissing(offer.description, cardElement.querySelector('.popup__description'));
   cardElement.querySelector('.popup__photos').innerHTML = '';
   cardElement.querySelector('.popup__photos').appendChild(getRandomPhotos(offer.photos, photosContainer, photoItem));

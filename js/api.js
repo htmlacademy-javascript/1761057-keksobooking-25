@@ -3,16 +3,7 @@ const URL = {
   'POST': 'https://25.javascript.pages.academy/keksobooking'
 };
 
-
-/*const getData = (onSuccess) => {
-  fetch('https://25.javascript.pages.academy/keksobooking/data')
-    .then((response) => response.json())
-    .then((data) => {
-      onSuccess(data);
-    });
-};*/
-
-const request = (onSuccess, onError, method, unBlockButton, body) => {
+const request = (onSuccess, onError, method, body) => {
   fetch(
     URL[method],
     {
@@ -23,7 +14,6 @@ const request = (onSuccess, onError, method, unBlockButton, body) => {
     .then((response) => response.json())
     .then((data) => {
       onSuccess(data);
-      unBlockButton();
     })
     .catch(() => {
       onError();

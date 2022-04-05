@@ -18,6 +18,8 @@ const MIN_HOUSE_PRICE = {
   'palace': 10000
 };
 
+const MAX_PRICE = 100000;
+
 const adForm = document.querySelector('.ad-form');
 const formElements = document.querySelectorAll('fieldset, .map__filter, .ad-form__slider');
 const mapFilters = document.querySelector('.map__filters');
@@ -26,11 +28,11 @@ const setDisabledState = () => {
   formElements.forEarch((item) => (item.disabled = !item.disabled));
 };
 
-function setActiveState() {
+const setActiveState = () => {
   adForm.classList.remove('ad-form--disabled');
   mapFilters.classList.remove('map__filters--disabled');
   setDisabledState();
-}
+};
 
 const setInactiveState = () => {
   adForm.classList.add('ad-form--disabled');
@@ -98,7 +100,7 @@ const minPriceSlider = () => {
   sliderElement.noUiSlider.updateOptions({
     range: {
       min: Number(price.placeholder),
-      max: 100000,
+      max: MAX_PRICE,
     },
     start: Number(price.placeholder)
   });
@@ -146,28 +148,53 @@ price.addEventListener('input', () => {
   sliderElement.noUiSlider.set(price.value);
 });
 
-// Загрузка аватарки
+// Загрузка аватарки и фото
 const FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+const defaultPreviewSrc = 'img/muffin-grey.svg';
+
 const preview = adForm.querySelector('.ad-form-header__preview img');
-const fileChooser = adForm.querySelector('.ad-form__field input[type=file]');
+const avatarChooser = adForm.querySelector('.ad-form__field input[type=file]');
 
-fileChooser.addEventListener('change', () => {
-  const file = fileChooser.files[0];
+const photo = adForm.querySelector('.ad-form__photo');
+const photoChooser = adForm.querySelector('.ad-form__upload input[type=file]');
+
+const fileCheck = (file) => {
   const fileName = file.name.toLowerCase();
+  return FILE_TYPES.some((it) => fileName.endsWith(it));
+};
 
-  const matches = FILE_TYPES.some((it) => fileName.endsWith(it));
-  if (matches) {
+avatarChooser.addEventListener('change', () => {
+  const file = avatarChooser.files[0];
+
+  if (fileCheck) {
     preview.src = URL.createObjectURL(file);
   }
 });
+
+photoChooser.addEventListener('change', () => {
+  const file = photoChooser.files[0];
+
+  if (fileCheck) {
+    photo.innerHTML = `<img src="${URL.createObjectURL(file)}" width="70" height="70">`;
+  }
+});
+
+// Сброс загруженных изображений
+const resetAllPhoto = () => {
+  preview.src = defaultPreviewSrc;
+  photo.innerHTML = '';
+};
+
 
 // Очистка формы
 const resetForm = adForm.querySelector('.ad-form__reset');
 
 const clearingForm = (evt) => {
   evt.preventDefault();
+  mapFilters.reset();
   adForm.reset();
   pristine.reset();
+  resetAllPhoto();
   minPriceSlider();
   price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
   setDefaultMarker();
@@ -193,8 +220,18 @@ const messageEventHandler = (message) => {
   });
 };
 
-// Сообщение об успешной отправке формы
+// Блокировка кнопок
 const adFormSubmit = document.querySelector('.ad-form__submit');
+
+const blockSubmitButton = () => {
+  adFormSubmit.disabled = true;
+};
+
+const unblockSubmitButton = () => {
+  adFormSubmit.disabled = false;
+};
+
+// Сообщение об успешной отправке формы
 const messageSuccessTemplate = document.querySelector('#success')
   .content
   .querySelector('.success');
@@ -204,6 +241,7 @@ const getSuccessMessage = (evt) => {
   document.body.appendChild(messageSuccess);
   messageEventHandler(messageSuccess);
   clearingForm(evt);
+  unblockSubmitButton();
 };
 
 // Сообщение о неудачной отправке формы
@@ -217,25 +255,19 @@ const getErrorMessage = () => {
   messageEventHandler(messageError);
 };
 
-// Блокировка кнопок
-const blockSubmitButton = () => {
-  adFormSubmit.disabled = true;
-};
-
-const unblockSubmitButton = () => {
-  adFormSubmit.disabled = false;
-};
-
 // Отправка формы
-const setFormSubmit = () => {
-  adForm.addEventListener('submit', (evt) => {
-    evt.preventDefault();
-    if (pristine.validate()) {
-      const formData = new FormData(evt.target);
-      blockSubmitButton();
-      request(getSuccessMessage, getErrorMessage, 'POST', unblockSubmitButton, formData);
-    }
-  });
-};
+adForm.addEventListener('submit', (evt) => {
+  evt.preventDefault();
+  if (pristine.validate()) {
+    const formData = new FormData(evt.target);
+    blockSubmitButton();
+    request(
+      () => getSuccessMessage(),
+      () => getErrorMessage,
+      'POST',
+      formData);
+  }
+});
 
-export {setActiveState, setInactiveState, setFormSubmit, getErrorMessage, unblockSubmitButton};
+
+export {setActiveState, setInactiveState, getErrorMessage};

@@ -1,14 +1,14 @@
 import {similarCards} from './popup.js';
 
-const mainCoordinates = {lat: 35.6895, lng: 139.69171};
-const mainZoom = 12.45;
+const MAIN_COORDINATES = {lat: 35.6895, lng: 139.69171};
+const MAIN_ZOOM = 12.45;
 const address = document.querySelector('#address');
 
 const map = L.map('map-canvas')
   .on('load', () => {
-    address.value = `${mainCoordinates['lat']}, ${mainCoordinates['lng']}`;
+    address.value = `${MAIN_COORDINATES['lat']}, ${MAIN_COORDINATES['lng']}`;
   })
-  .setView(mainCoordinates, mainZoom);
+  .setView(MAIN_COORDINATES, MAIN_ZOOM);
 
 L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -24,12 +24,14 @@ const mainPinIcon = L.icon({
 });
 
 const marker = L.marker(
-  mainCoordinates,
+  MAIN_COORDINATES,
   {
     draggable: true,
     icon: mainPinIcon,
   },
 ).addTo(map);
+
+const markerGroup = L.layerGroup().addTo(map);
 
 const setDefaultMarker = () => {
   const newLatLng = new L.LatLng(35.6895, 139.69171);
@@ -41,8 +43,6 @@ marker.on('moveend', (evt) => {
   const points = evt.target.getLatLng();
   address.value = `${points['lat'].toFixed(5)}, ${points['lng'].toFixed(5)}`;
 });
-
-const markerGroup = L.layerGroup().addTo(map);
 
 const adPinIcon = L.icon({
   iconUrl: './img/pin.svg',
