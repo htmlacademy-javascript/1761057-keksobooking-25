@@ -1,12 +1,20 @@
-import {similarCards} from './popup.js';
+import {returnSimilarCard} from './popup.js';
+import {debounce} from './util.js';
+import {request} from './api.js';
+import {filterData} from './filter.js';
+import {getErrorMessage, setActiveState} from './form.js';
 
 const MAIN_COORDINATES = {lat: 35.6895, lng: 139.69171};
 const MAIN_ZOOM = 12.45;
+const DEBOUNCE_VALUE = 500;
+const MAX_OFFERS = 10;
+const filterMapForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
 
 const map = L.map('map-canvas')
   .on('load', () => {
     address.value = `${MAIN_COORDINATES['lat']}, ${MAIN_COORDINATES['lng']}`;
+    setActiveState();
   })
   .setView(MAIN_COORDINATES, MAIN_ZOOM);
 
@@ -32,9 +40,12 @@ const marker = L.marker(
 ).addTo(map);
 
 const markerGroup = L.layerGroup().addTo(map);
+const removeMapPin = () => {
+  markerGroup.clearLayers();
+};
 
 const setDefaultMarker = () => {
-  const newLatLng = new L.LatLng(35.6895, 139.69171);
+  const newLatLng = new L.LatLng(MAIN_COORDINATES.lat, MAIN_COORDINATES.lng);
   marker.setLatLng(newLatLng);
   address.value = `${newLatLng['lat']}, ${newLatLng['lng']}`;
 };
@@ -50,7 +61,7 @@ const adPinIcon = L.icon({
   iconAnchor: [20, 40],
 });
 
-const similarHotels = (hotels) => {
+const getSimilarHotels = (hotels) => {
   hotels.forEach((hotel) => {
     const {
       location: {
@@ -68,8 +79,28 @@ const similarHotels = (hotels) => {
 
     adPin
       .addTo(markerGroup)
-      .bindPopup(similarCards(hotel));
+      .bindPopup(returnSimilarCard(hotel));
   });
 };
 
-export {similarHotels, setDefaultMarker, markerGroup};
+// Отрисовка маркеров, подходящих под фильтрацию
+let offers = [];
+const updateMarkers = (debounce(() => {
+  removeMapPin();
+  getSimilarHotels(filterData(offers));
+}, DEBOUNCE_VALUE));
+
+const onSuccess = (data) => {
+  offers = data.slice();
+  getSimilarHotels(offers.slice(0, MAX_OFFERS));
+
+  filterMapForm.addEventListener('change', updateMarkers);
+};
+
+const onError = () => {
+  getErrorMessage();
+};
+
+request(onSuccess, onError, 'GET');
+
+export {setDefaultMarker, removeMapPin, updateMarkers};

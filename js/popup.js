@@ -1,5 +1,4 @@
-// Функция сопоставления элемента массива с ключом объекта
-const TYPES_TRANSLATE = {
+const TYPE_TRANSLATE = {
   palace: 'Дворец',
   flat: 'Квартира',
   house: 'Дом',
@@ -9,7 +8,7 @@ const TYPES_TRANSLATE = {
 
 const getValue = (array, type) => {
   for (const [key, value] of Object.entries(array)) {
-    if (key === type) { return value; }
+    if (key === type) {return value;}
   }
 };
 
@@ -20,10 +19,10 @@ const cardTemplate = document.querySelector('#card')
 //Функция для отображения удобств в номере
 const getRandomFeatures = (array, list) => {
   list.forEach((featureListItem) => {
-    const isNeed = array.some(
+    const isNeedFeatures = array.some(
       (someComfort) => featureListItem.classList.contains(`popup__feature--${someComfort}`),
     );
-    if (!isNeed) {featureListItem.remove();}
+    if (!isNeedFeatures) {featureListItem.remove();}
   });
 };
 
@@ -56,8 +55,7 @@ const checkDataMissing = (data, element) => {
   }
 };
 
-const similarCards = ({author, offer}) => {
-
+const returnSimilarCard = ({author, offer}) => {
   const cardElement = cardTemplate.cloneNode(true);
   const photosContainer = cardElement.querySelector('.popup__photos');
   const photoItem = cardElement.querySelector('.popup__photo');
@@ -65,7 +63,7 @@ const similarCards = ({author, offer}) => {
   checkDataMissing(offer.title, cardElement.querySelector('.popup__title'));
   checkDataMissing(offer.address, cardElement.querySelector('.popup__text--address'));
   checkDataMissing(`${offer.price} ₽/ночь`, cardElement.querySelector('.popup__text--price'));
-  checkDataMissing(getValue(TYPES_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
+  checkDataMissing(getValue(TYPE_TRANSLATE, offer.type), cardElement.querySelector('.popup__type'));
   checkDataMissing(`${offer.rooms} комнаты для ${offer.guests} гостей`, cardElement.querySelector('.popup__text--capacity'));
   checkDataMissing(`Заезд после ${offer.checkin}, выезд до ${offer.checkout}`, cardElement.querySelector('.popup__text--time'));
 
@@ -83,4 +81,4 @@ const similarCards = ({author, offer}) => {
   return cardElement;
 };
 
-export {similarCards};
+export {returnSimilarCard};
