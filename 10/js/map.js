@@ -1,16 +1,22 @@
-import {similarCards} from './popup.js';
-import {getData} from './api.js';
+import {returnSimilarCard} from './popup.js';
 import {debounce} from './util.js';
+import {request} from './api.js';
+import {filterData} from './filter.js';
+import {getErrorMessage, setActiveState} from './form.js';
 
-const mainCoordinates = {lat: 35.6895, lng: 139.69171};
-const mainZoom = 12.45;
+const MAIN_COORDINATES = {lat: 35.6895, lng: 139.69171};
+const MAIN_ZOOM = 12.45;
+const DEBOUNCE_VALUE = 500;
+const MAX_OFFERS = 10;
+const filterMapForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
 
 const map = L.map('map-canvas')
   .on('load', () => {
-    address.value = `${mainCoordinates['lat']}, ${mainCoordinates['lng']}`;
+    address.value = `${MAIN_COORDINATES['lat']}, ${MAIN_COORDINATES['lng']}`;
+    setActiveState();
   })
-  .setView(mainCoordinates, mainZoom);
+  .setView(MAIN_COORDINATES, MAIN_ZOOM);
 
 L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -26,15 +32,20 @@ const mainPinIcon = L.icon({
 });
 
 const marker = L.marker(
-  mainCoordinates,
+  MAIN_COORDINATES,
   {
     draggable: true,
     icon: mainPinIcon,
   },
 ).addTo(map);
 
+const markerGroup = L.layerGroup().addTo(map);
+const removeMapPin = () => {
+  markerGroup.clearLayers();
+};
+
 const setDefaultMarker = () => {
-  const newLatLng = new L.LatLng(35.6895, 139.69171);
+  const newLatLng = new L.LatLng(MAIN_COORDINATES.lat, MAIN_COORDINATES.lng);
   marker.setLatLng(newLatLng);
   address.value = `${newLatLng['lat']}, ${newLatLng['lng']}`;
 };
@@ -44,15 +55,13 @@ marker.on('moveend', (evt) => {
   address.value = `${points['lat'].toFixed(5)}, ${points['lng'].toFixed(5)}`;
 });
 
-const markerGroup = L.layerGroup().addTo(map);
-
 const adPinIcon = L.icon({
   iconUrl: './img/pin.svg',
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
 
-const similarHotels = (hotels) => {
+const getSimilarHotels = (hotels) => {
   hotels.forEach((hotel) => {
     const {
       location: {
@@ -70,101 +79,28 @@ const similarHotels = (hotels) => {
 
     adPin
       .addTo(markerGroup)
-      .bindPopup(similarCards(hotel));
+      .bindPopup(returnSimilarCard(hotel));
   });
 };
-
-const MAX_COUNT = 10;
-const selectTypes = document.querySelectorAll('.map__filter');
-let offers = [];
-const filterMask = {
-  type: 'any',
-  rooms: 'any',
-  price: 'any',
-  guests: 'any',
-  features: [],
-};
-
-const PRICE = {
-  'low': {min: 0, max: 10000},
-  'middle': {min: 10000, max: 50000},
-  'high': {min: 50000, max: 100000}
-};
-
-// Ищем все checkbox'ы и создаём пустой массив
-const mapFeatures = document.querySelector('#housing-features');
-const featuresCheckbox = mapFeatures.querySelectorAll('input[type=\'checkbox\']');
-let checkboxValues = [];
-
-// Проверяем каждый выбранный чекбокс и заносим в массив
-const grabCheckboxValues = () => {
-  checkboxValues = [];
-  featuresCheckbox.forEach((checkbox) => {
-    if (checkbox.checked) {
-      checkboxValues.push(checkbox.value);
-    }
-  });
-
-  return checkboxValues;
-};
-
-// Фильтрация всей формы на карте
-const filtersArray = (array, filter) => array.filter((item) => {
-  for (const key in filter) {
-    if (key === 'price') {
-      if (filter[key] !== 'any') {
-        if (!(item.offer.price >= PRICE[filter[key]].min && item.offer.price < PRICE[filter[key]].max)) {
-          return false;
-        }
-      }
-    } else if (key === 'features') {
-      if (filter[key].length !== 0) {
-        if (item.offer.features !== undefined) {
-          const filterInclude = grabCheckboxValues().every((element) => item.offer.features.includes(element));
-          if (!filterInclude) {return false;}
-        } else {
-          return false;
-        }
-      }
-    } else {
-      if (item.offer[key] === undefined || item.offer[key] !== filter[key] && filter[key] !== 'any') {
-        return false;
-      }
-    }
-  }
-  return true;
-});
 
 // Отрисовка маркеров, подходящих под фильтрацию
-const markerUpdate = (debounce(() => {
-  markerGroup.clearLayers();
-  const filteringResult = filtersArray(offers, filterMask);
-  similarHotels(filteringResult.slice(0, MAX_COUNT));
-}, 500));
+let offers = [];
+const updateMarkers = (debounce(() => {
+  removeMapPin();
+  getSimilarHotels(filterData(offers));
+}, DEBOUNCE_VALUE));
 
-// Копия массива, навешивание обработчиков события и подстановка в маску
 const onSuccess = (data) => {
   offers = data.slice();
-  similarHotels(offers.slice(0, MAX_COUNT));
+  getSimilarHotels(offers.slice(0, MAX_OFFERS));
 
-  selectTypes.forEach((select) => {
-    select.addEventListener('change', (evt) => {
-      evt.preventDefault();
-      if (isNaN(evt.target.value)) {
-        filterMask[select.id.slice(8)] = evt.target.value;
-      } else {
-        filterMask[select.id.slice(8)] = Number(evt.target.value);
-      }
-      markerUpdate();
-    });
-  });
-
-  mapFeatures.addEventListener('change', () => {
-    filterMask.features = grabCheckboxValues();
-    markerUpdate();
-  });
+  filterMapForm.addEventListener('change', updateMarkers);
 };
 
-getData(onSuccess);
+const onError = () => {
+  getErrorMessage();
+};
 
-export {similarHotels, setDefaultMarker};
+request(onSuccess, onError, 'GET');
+
+export {setDefaultMarker, removeMapPin, updateMarkers};
