@@ -16,7 +16,6 @@ const cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.popup');
 
-//Функция для отображения удобств в номере
 const getRandomFeatures = (array, list) => {
   list.forEach((featureListItem) => {
     const isNeedFeatures = array.some(
@@ -26,7 +25,6 @@ const getRandomFeatures = (array, list) => {
   });
 };
 
-// Функция для фото
 const fragment = document.createDocumentFragment();
 
 const getRandomPhotos = (array, container, element) => {
@@ -42,7 +40,6 @@ const getRandomPhotos = (array, container, element) => {
   return fragment;
 };
 
-// Функция проверки на недостающие данные
 const checkDataMissing = (data, element) => {
   if (data && !data.includes('undefined')) {
     if (data.indexOf('.png') >= 0) {

@@ -34,7 +34,6 @@ const setActiveState = () => {
   setDisabledState();
 };
 
-// Валидация
 const pristine = new Pristine(adForm, {
   classTo: 'ad-form__element',
   errorClass: 'ad-form__item--invalid',
@@ -44,7 +43,6 @@ const pristine = new Pristine(adForm, {
   errorTextClass: 'ad-form__error'
 });
 
-// Количество комнат - количество гостей
 const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
 
@@ -58,7 +56,6 @@ roomNumber.addEventListener('change', () => {
   pristine.validate();
 });
 
-// Заезд - выезд
 const timeIn = adForm.querySelector('#timein');
 const timeOut = adForm.querySelector('#timeout');
 
@@ -97,7 +94,6 @@ const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
 const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
 pristine.addValidator(price, checkMinPrice, getPriceErrorMessage);
 
-// Слайдер с ценой
 noUiSlider.create(sliderElement, {
   range: {
     min: MIN_HOUSE_PRICE[typeHousing.value],
@@ -127,7 +123,6 @@ price.addEventListener('input', () => {
   sliderElement.noUiSlider.set(price.value);
 });
 
-// Загрузка аватарки и фото
 const defaultPreviewSrc = 'img/muffin-grey.svg';
 const avatarPreview = adForm.querySelector('.ad-form-header__preview img');
 const avatarChooser = adForm.querySelector('.ad-form__field input[type=file]');
@@ -155,13 +150,11 @@ photoChooser.addEventListener('change', () => {
   }
 });
 
-// Сброс загруженных изображений
 const resetAllImages = () => {
   avatarPreview.src = defaultPreviewSrc;
   photoPreview.innerHTML = '';
 };
 
-// Очистка формы
 const resetForm = adForm.querySelector('.ad-form__reset');
 
 const clearForm = (evt) => {
@@ -179,7 +172,6 @@ const clearForm = (evt) => {
 
 resetForm.addEventListener('click', clearForm);
 
-// Обработчик события для сообщения
 const messageEventHandler = (message) => {
   const closeSuccessKeyDown = (evt) => {
     if (evt.key === 'Escape') {
@@ -197,7 +189,6 @@ const messageEventHandler = (message) => {
   });
 };
 
-// Блокировка кнопок
 const adFormSubmit = document.querySelector('.ad-form__submit');
 
 const blockSubmitButton = () => {
@@ -208,7 +199,6 @@ const unblockSubmitButton = () => {
   adFormSubmit.disabled = false;
 };
 
-// Сообщение об успешной отправке формы
 const messageSuccessTemplate = document.querySelector('#success')
   .content
   .querySelector('.success');
@@ -221,7 +211,6 @@ const getSuccessMessage = (evt) => {
   unblockSubmitButton();
 };
 
-// Сообщение о неудачной отправке формы
 const messageErrorTemplate = document.querySelector('#error')
   .content
   .querySelector('.error');
@@ -232,7 +221,6 @@ const getErrorMessage = () => {
   messageEventHandler(messageError);
 };
 
-// Отправка формы
 adForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
   if (pristine.validate()) {
