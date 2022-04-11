@@ -4,11 +4,7 @@ const numDecline = (num) => {
     num = num % 10;
   }
 
-  if (num === 1) {
-    return 'гостя';
-  } else {
-    return 'гостей';
-  }
+  return (num === 1) ? 'гостя' : 'гостей';
 };
 
 const debounce = (callback, timeoutDelay = 500) => {

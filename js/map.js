@@ -83,7 +83,6 @@ const getSimilarHotels = (hotels) => {
   });
 };
 
-// Отрисовка маркеров, подходящих под фильтрацию
 let offers = [];
 const updateMarkers = (debounce(() => {
   removeMapPin();
