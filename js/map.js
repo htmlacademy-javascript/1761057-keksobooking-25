@@ -1,10 +1,10 @@
 import {returnSimilarCard} from './popup.js';
 import {debounce} from './util.js';
-import {request} from './api.js';
+import {makeRequest} from './api.js';
 import {filterData} from './filter.js';
 import {getErrorMessage, setActiveState} from './form.js';
 
-const MAIN_COORDINATES = {lat: 35.6895, lng: 139.69171};
+const MAIN_COORDINATES = {lat: 35.68950, lng: 139.69171};
 const MAIN_ZOOM = 12.45;
 const DEBOUNCE_VALUE = 500;
 const MAX_OFFERS = 10;
@@ -13,7 +13,7 @@ const address = document.querySelector('#address');
 
 const map = L.map('map-canvas')
   .on('load', () => {
-    address.value = `${MAIN_COORDINATES['lat']}, ${MAIN_COORDINATES['lng']}`;
+    address.value = `${MAIN_COORDINATES['lat'].toFixed(5)}, ${MAIN_COORDINATES['lng'].toFixed(5)}`;
     setActiveState();
   })
   .setView(MAIN_COORDINATES, MAIN_ZOOM);
@@ -50,7 +50,7 @@ const setDefaultMarker = () => {
   address.value = `${newLatLng['lat']}, ${newLatLng['lng']}`;
 };
 
-marker.on('moveend', (evt) => {
+marker.on('mousemove', (evt) => {
   const points = evt.target.getLatLng();
   address.value = `${points['lat'].toFixed(5)}, ${points['lng'].toFixed(5)}`;
 });
@@ -100,6 +100,6 @@ const onError = () => {
   getErrorMessage();
 };
 
-request(onSuccess, onError, 'GET');
+makeRequest(onSuccess, onError, 'GET');
 
 export {setDefaultMarker, removeMapPin, updateMarkers};

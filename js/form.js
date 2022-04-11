@@ -1,6 +1,6 @@
 import {setDefaultMarker, removeMapPin, updateMarkers} from './map.js';
-import {numDecline} from './util.js';
-import {request} from './api.js';
+import {checkNounEnding} from './util.js';
+import {makeRequest} from './api.js';
 
 const MAX_PRICE = 100000;
 const SLIDER_STEP = 1;
@@ -34,6 +34,12 @@ const setActiveState = () => {
   setDisabledState();
 };
 
+const setInactiveState = () => {
+  adForm.classList.add('ad-form--disabled');
+  mapFilters.classList.add('map__filters--disabled');
+  setDisabledState();
+};
+
 const pristine = new Pristine(adForm, {
   classTo: 'ad-form__element',
   errorClass: 'ad-form__item--invalid',
@@ -47,7 +53,7 @@ const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
 
 const validateRoomNumber = (value) => roomNumber.value.length && ROOM_SERVICE[roomNumber.value].includes(value);
-const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
+const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOM_SERVICE[roomNumber.value]} ${checkNounEnding(roomNumber.value)}` ;
 
 pristine.addValidator(guest, validateRoomNumber, getServiceErrorMessage);
 pristine.addValidator(roomNumber, validateRoomNumber);
@@ -103,15 +109,8 @@ noUiSlider.create(sliderElement, {
   step: SLIDER_STEP,
   connect: 'lower',
   format: {
-    to: function (value) {
-      if (Number.isInteger(value)) {
-        return value.toFixed(0);
-      }
-      return value.toFixed(0);
-    },
-    from: function (value) {
-      return parseFloat(value);
-    },
+    to: (value) => (Number.isInteger(value)) ? value.toFixed(0) : value.toFixed(0),
+    from: (value) => parseFloat(value),
   },
 });
 
@@ -219,14 +218,16 @@ const getErrorMessage = () => {
   const messageError = messageErrorTemplate.cloneNode(true);
   document.body.appendChild(messageError);
   messageEventHandler(messageError);
+  setInactiveState();
 };
+
 
 adForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
   if (pristine.validate()) {
     const formData = new FormData(evt.target);
     blockSubmitButton();
-    request(
+    makeRequest(
       () => getSuccessMessage(evt),
       () => getErrorMessage,
       'POST',
