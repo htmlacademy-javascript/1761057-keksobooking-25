@@ -1,4 +1,4 @@
-const numDecline = (num) => {
+const checkNounEnding = (num) => {
   num = num % 100;
   if (num > 19) {
     num = num % 10;
@@ -16,4 +16,4 @@ const debounce = (callback, timeoutDelay = 500) => {
   };
 };
 
-export {numDecline, debounce};
+export {checkNounEnding, debounce};

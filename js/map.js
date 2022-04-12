@@ -1,29 +1,19 @@
 import {returnSimilarCard} from './popup.js';
 import {debounce} from './util.js';
-import {request} from './api.js';
+import {makeRequest} from './api.js';
 import {filterData} from './filter.js';
-import {getErrorMessage, setActiveState} from './form.js';
+import {getErrorMessage, setActiveState, setDisabledState} from './form.js';
 
-const MAIN_COORDINATES = {lat: 35.6895, lng: 139.69171};
+const MAIN_COORDINATES = {lat: 35.68950, lng: 139.69171};
 const MAIN_ZOOM = 12.45;
 const DEBOUNCE_VALUE = 500;
 const MAX_OFFERS = 10;
+const ERROR_MESSAGE_GET = 'Ошибка загрузки объявлений';
+
 const filterMapForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
 
-const map = L.map('map-canvas')
-  .on('load', () => {
-    address.value = `${MAIN_COORDINATES['lat']}, ${MAIN_COORDINATES['lng']}`;
-    setActiveState();
-  })
-  .setView(MAIN_COORDINATES, MAIN_ZOOM);
-
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-).addTo(map);
+const map = L.map('map-canvas');
 
 const mainPinIcon = L.icon({
   iconUrl: './img/main-pin.svg',
@@ -50,7 +40,7 @@ const setDefaultMarker = () => {
   address.value = `${newLatLng['lat']}, ${newLatLng['lng']}`;
 };
 
-marker.on('moveend', (evt) => {
+marker.on('mousemove', (evt) => {
   const points = evt.target.getLatLng();
   address.value = `${points['lat'].toFixed(5)}, ${points['lng'].toFixed(5)}`;
 });
@@ -84,22 +74,37 @@ const getSimilarHotels = (hotels) => {
 };
 
 let offers = [];
-const updateMarkers = (debounce(() => {
+const onMarkersUpdate = (debounce(() => {
   removeMapPin();
   getSimilarHotels(filterData(offers));
 }, DEBOUNCE_VALUE));
 
 const onSuccess = (data) => {
+  setActiveState();
   offers = data.slice();
   getSimilarHotels(offers.slice(0, MAX_OFFERS));
 
-  filterMapForm.addEventListener('change', updateMarkers);
+  filterMapForm.addEventListener('change', onMarkersUpdate);
 };
 
 const onError = () => {
-  getErrorMessage();
+  const adForm = document.querySelector('.ad-form');
+  adForm.classList.remove('ad-form--disabled');
+  setDisabledState();
+  getErrorMessage(ERROR_MESSAGE_GET);
 };
 
-request(onSuccess, onError, 'GET');
+map.on('load', () => {
+  address.value = `${MAIN_COORDINATES['lat'].toFixed(5)}, ${MAIN_COORDINATES['lng'].toFixed(5)}`;
+  makeRequest(onSuccess, onError, 'GET');
+})
+  .setView(MAIN_COORDINATES, MAIN_ZOOM);
 
-export {setDefaultMarker, removeMapPin, updateMarkers};
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  },
+).addTo(map);
+
+export {setDefaultMarker, removeMapPin, onMarkersUpdate};

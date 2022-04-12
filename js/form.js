@@ -1,10 +1,11 @@
-import {setDefaultMarker, removeMapPin, updateMarkers} from './map.js';
-import {numDecline} from './util.js';
-import {request} from './api.js';
+import {setDefaultMarker, removeMapPin, onMarkersUpdate} from './map.js';
+import {checkNounEnding} from './util.js';
+import {makeRequest} from './api.js';
 
 const MAX_PRICE = 100000;
 const SLIDER_STEP = 1;
 const FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+const ERROR_MESSAGE_SEND = 'Ошибка размещения объявления';
 const ROOM_SERVICE = {
   '1': ['1'],
   '2': ['1', '2'],
@@ -34,6 +35,12 @@ const setActiveState = () => {
   setDisabledState();
 };
 
+const setInactiveState = () => {
+  adForm.classList.add('ad-form--disabled');
+  mapFilters.classList.add('map__filters--disabled');
+  setDisabledState();
+};
+
 const pristine = new Pristine(adForm, {
   classTo: 'ad-form__element',
   errorClass: 'ad-form__item--invalid',
@@ -47,7 +54,7 @@ const guest = adForm.querySelector('#capacity');
 const roomNumber = adForm.querySelector('#room_number');
 
 const validateRoomNumber = (value) => roomNumber.value.length && ROOM_SERVICE[roomNumber.value].includes(value);
-const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOM_SERVICE[roomNumber.value]} ${numDecline(roomNumber.value)}` ;
+const getServiceErrorMessage = () => (roomNumber.value === '100') ? 'Не для гостей' : `Для ${ROOM_SERVICE[roomNumber.value]} ${checkNounEnding(roomNumber.value)}` ;
 
 pristine.addValidator(guest, validateRoomNumber, getServiceErrorMessage);
 pristine.addValidator(roomNumber, validateRoomNumber);
@@ -67,7 +74,6 @@ timeOut.addEventListener('change', () => {
   timeIn.value = timeOut.value;
 });
 
-// Тип жилья - цена
 const sliderElement = adForm.querySelector('.ad-form__slider');
 const price = adForm.querySelector('#price');
 const typeHousing = adForm.querySelector('#type');
@@ -82,13 +88,13 @@ const getMinPriceSlider = () => {
   });
 };
 
-const validateMinPrice = () => {
+const onMinPriceValidate = () => {
   price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
   getMinPriceSlider();
   pristine.validate();
 };
 
-typeHousing.addEventListener('change', validateMinPrice);
+typeHousing.addEventListener('change', onMinPriceValidate);
 
 const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
 const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
@@ -103,15 +109,8 @@ noUiSlider.create(sliderElement, {
   step: SLIDER_STEP,
   connect: 'lower',
   format: {
-    to: function (value) {
-      if (Number.isInteger(value)) {
-        return value.toFixed(0);
-      }
-      return value.toFixed(0);
-    },
-    from: function (value) {
-      return parseFloat(value);
-    },
+    to: (value) => (Number.isInteger(value)) ? value.toFixed(0) : value.toFixed(0),
+    from: (value) => parseFloat(value),
   },
 });
 
@@ -157,7 +156,7 @@ const resetAllImages = () => {
 
 const resetForm = adForm.querySelector('.ad-form__reset');
 
-const clearForm = (evt) => {
+const onFormClear = (evt) => {
   evt.preventDefault();
   mapFilters.reset();
   adForm.reset();
@@ -167,25 +166,25 @@ const clearForm = (evt) => {
   price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
   setDefaultMarker();
   removeMapPin();
-  updateMarkers();
+  onMarkersUpdate();
 };
 
-resetForm.addEventListener('click', clearForm);
+resetForm.addEventListener('click', onFormClear);
 
 const messageEventHandler = (message) => {
-  const closeSuccessKeyDown = (evt) => {
+  const onMessageEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      message.classList.add('hidden');
-      document.removeEventListener('keydown', closeSuccessKeyDown);
+      message.remove();
+      document.removeEventListener('keydown', onMessageEscKeydown);
     }
   };
 
-  document.addEventListener('keydown', closeSuccessKeyDown);
+  document.addEventListener('keydown', onMessageEscKeydown);
 
   message.addEventListener('click', () => {
-    message.classList.add('hidden');
-    document.removeEventListener('click', closeSuccessKeyDown);
+    message.remove();
+    document.removeEventListener('keydown', onMessageEscKeydown);
   });
 };
 
@@ -207,7 +206,7 @@ const getSuccessMessage = (evt) => {
   const messageSuccess = messageSuccessTemplate.cloneNode(true);
   document.body.appendChild(messageSuccess);
   messageEventHandler(messageSuccess);
-  clearForm(evt);
+  onFormClear(evt);
   unblockSubmitButton();
 };
 
@@ -215,10 +214,16 @@ const messageErrorTemplate = document.querySelector('#error')
   .content
   .querySelector('.error');
 
-const getErrorMessage = () => {
+const getErrorMessage = (message) => {
   const messageError = messageErrorTemplate.cloneNode(true);
+
+  if (message !== '') {
+    messageError.querySelector('.error__message').textContent = message;
+  }
+
   document.body.appendChild(messageError);
   messageEventHandler(messageError);
+  unblockSubmitButton();
 };
 
 adForm.addEventListener('submit', (evt) => {
@@ -226,12 +231,12 @@ adForm.addEventListener('submit', (evt) => {
   if (pristine.validate()) {
     const formData = new FormData(evt.target);
     blockSubmitButton();
-    request(
+    makeRequest(
       () => getSuccessMessage(evt),
-      () => getErrorMessage,
+      () => getErrorMessage(ERROR_MESSAGE_SEND),
       'POST',
       formData);
   }
 });
 
-export {setActiveState, getErrorMessage};
+export {setActiveState, setInactiveState, setDisabledState, getErrorMessage};
