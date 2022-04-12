@@ -1,3 +1,5 @@
-import './popup.js';
+import {setInactiveState} from './form.js';
 import './map.js';
-import './form.js';
+import './popup.js';
+
+setInactiveState();

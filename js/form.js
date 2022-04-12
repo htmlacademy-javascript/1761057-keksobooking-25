@@ -1,4 +1,4 @@
-import {setDefaultMarker, removeMapPin, updateMarkers} from './map.js';
+import {setDefaultMarker, removeMapPin, onMarkersUpdate} from './map.js';
 import {checkNounEnding} from './util.js';
 import {makeRequest} from './api.js';
 
@@ -88,13 +88,13 @@ const getMinPriceSlider = () => {
   });
 };
 
-const validateMinPrice = () => {
+const onMinPriceValidate = () => {
   price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
   getMinPriceSlider();
   pristine.validate();
 };
 
-typeHousing.addEventListener('change', validateMinPrice);
+typeHousing.addEventListener('change', onMinPriceValidate);
 
 const checkMinPrice = () => Number(price.value) >= Number(price.placeholder);
 const getPriceErrorMessage = () => `Минимальная цена ${price.placeholder} рублей`;
@@ -156,7 +156,7 @@ const resetAllImages = () => {
 
 const resetForm = adForm.querySelector('.ad-form__reset');
 
-const clearForm = (evt) => {
+const onFormClear = (evt) => {
   evt.preventDefault();
   mapFilters.reset();
   adForm.reset();
@@ -166,25 +166,25 @@ const clearForm = (evt) => {
   price.placeholder = MIN_HOUSE_PRICE[typeHousing.value];
   setDefaultMarker();
   removeMapPin();
-  updateMarkers();
+  onMarkersUpdate();
 };
 
-resetForm.addEventListener('click', clearForm);
+resetForm.addEventListener('click', onFormClear);
 
 const messageEventHandler = (message) => {
-  const closeSuccessKeyDown = (evt) => {
+  const onMessageEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       message.classList.add('hidden');
-      document.removeEventListener('keydown', closeSuccessKeyDown);
+      document.removeEventListener('keydown', onMessageEscKeydown);
     }
   };
 
-  document.addEventListener('keydown', closeSuccessKeyDown);
+  document.addEventListener('keydown', onMessageEscKeydown);
 
   message.addEventListener('click', () => {
     message.classList.add('hidden');
-    document.removeEventListener('click', closeSuccessKeyDown);
+    document.removeEventListener('keydown', onMessageEscKeydown);
   });
 };
 
@@ -206,7 +206,7 @@ const getSuccessMessage = (evt) => {
   const messageSuccess = messageSuccessTemplate.cloneNode(true);
   document.body.appendChild(messageSuccess);
   messageEventHandler(messageSuccess);
-  clearForm(evt);
+  onFormClear(evt);
   unblockSubmitButton();
 };
 
@@ -218,9 +218,8 @@ const getErrorMessage = () => {
   const messageError = messageErrorTemplate.cloneNode(true);
   document.body.appendChild(messageError);
   messageEventHandler(messageError);
-  setInactiveState();
+  unblockSubmitButton();
 };
-
 
 adForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
@@ -229,10 +228,10 @@ adForm.addEventListener('submit', (evt) => {
     blockSubmitButton();
     makeRequest(
       () => getSuccessMessage(evt),
-      () => getErrorMessage,
+      () => getErrorMessage(),
       'POST',
       formData);
   }
 });
 
-export {setActiveState, getErrorMessage};
+export {setActiveState, setInactiveState, getErrorMessage};

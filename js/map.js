@@ -11,19 +11,7 @@ const MAX_OFFERS = 10;
 const filterMapForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
 
-const map = L.map('map-canvas')
-  .on('load', () => {
-    address.value = `${MAIN_COORDINATES['lat'].toFixed(5)}, ${MAIN_COORDINATES['lng'].toFixed(5)}`;
-    setActiveState();
-  })
-  .setView(MAIN_COORDINATES, MAIN_ZOOM);
-
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-).addTo(map);
+const map = L.map('map-canvas');
 
 const mainPinIcon = L.icon({
   iconUrl: './img/main-pin.svg',
@@ -84,22 +72,36 @@ const getSimilarHotels = (hotels) => {
 };
 
 let offers = [];
-const updateMarkers = (debounce(() => {
+const onMarkersUpdate = (debounce(() => {
   removeMapPin();
   getSimilarHotels(filterData(offers));
 }, DEBOUNCE_VALUE));
 
 const onSuccess = (data) => {
+  setActiveState();
   offers = data.slice();
   getSimilarHotels(offers.slice(0, MAX_OFFERS));
 
-  filterMapForm.addEventListener('change', updateMarkers);
+  filterMapForm.addEventListener('change', onMarkersUpdate);
 };
 
 const onError = () => {
+  const adForm = document.querySelector('.ad-form');
+  adForm.classList.remove('ad-form--disabled');
   getErrorMessage();
 };
 
-makeRequest(onSuccess, onError, 'GET');
+map.on('load', () => {
+  address.value = `${MAIN_COORDINATES['lat'].toFixed(5)}, ${MAIN_COORDINATES['lng'].toFixed(5)}`;
+  makeRequest(onSuccess, onError, 'GET');
+})
+  .setView(MAIN_COORDINATES, MAIN_ZOOM);
 
-export {setDefaultMarker, removeMapPin, updateMarkers};
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  },
+).addTo(map);
+
+export {setDefaultMarker, removeMapPin, onMarkersUpdate};
