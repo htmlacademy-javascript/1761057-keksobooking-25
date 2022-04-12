@@ -175,7 +175,7 @@ const messageEventHandler = (message) => {
   const onMessageEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      message.classList.add('hidden');
+      message.remove();
       document.removeEventListener('keydown', onMessageEscKeydown);
     }
   };
@@ -183,7 +183,7 @@ const messageEventHandler = (message) => {
   document.addEventListener('keydown', onMessageEscKeydown);
 
   message.addEventListener('click', () => {
-    message.classList.add('hidden');
+    message.remove();
     document.removeEventListener('keydown', onMessageEscKeydown);
   });
 };
