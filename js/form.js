@@ -5,6 +5,7 @@ import {makeRequest} from './api.js';
 const MAX_PRICE = 100000;
 const SLIDER_STEP = 1;
 const FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+const ERROR_MESSAGE_SEND = 'Ошибка размещения объявления';
 const ROOM_SERVICE = {
   '1': ['1'],
   '2': ['1', '2'],
@@ -73,7 +74,6 @@ timeOut.addEventListener('change', () => {
   timeIn.value = timeOut.value;
 });
 
-// Тип жилья - цена
 const sliderElement = adForm.querySelector('.ad-form__slider');
 const price = adForm.querySelector('#price');
 const typeHousing = adForm.querySelector('#type');
@@ -214,8 +214,13 @@ const messageErrorTemplate = document.querySelector('#error')
   .content
   .querySelector('.error');
 
-const getErrorMessage = () => {
+const getErrorMessage = (message) => {
   const messageError = messageErrorTemplate.cloneNode(true);
+
+  if (message !== '') {
+    messageError.querySelector('.error__message').textContent = message;
+  }
+
   document.body.appendChild(messageError);
   messageEventHandler(messageError);
   unblockSubmitButton();
@@ -228,10 +233,10 @@ adForm.addEventListener('submit', (evt) => {
     blockSubmitButton();
     makeRequest(
       () => getSuccessMessage(evt),
-      () => getErrorMessage(),
+      () => getErrorMessage(ERROR_MESSAGE_SEND),
       'POST',
       formData);
   }
 });
 
-export {setActiveState, setInactiveState, getErrorMessage};
+export {setActiveState, setInactiveState, setDisabledState, getErrorMessage};

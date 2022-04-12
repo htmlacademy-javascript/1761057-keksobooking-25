@@ -2,12 +2,14 @@ import {returnSimilarCard} from './popup.js';
 import {debounce} from './util.js';
 import {makeRequest} from './api.js';
 import {filterData} from './filter.js';
-import {getErrorMessage, setActiveState} from './form.js';
+import {getErrorMessage, setActiveState, setDisabledState} from './form.js';
 
 const MAIN_COORDINATES = {lat: 35.68950, lng: 139.69171};
 const MAIN_ZOOM = 12.45;
 const DEBOUNCE_VALUE = 500;
 const MAX_OFFERS = 10;
+const ERROR_MESSAGE_GET = 'Ошибка загрузки объявлений';
+
 const filterMapForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
 
@@ -88,7 +90,8 @@ const onSuccess = (data) => {
 const onError = () => {
   const adForm = document.querySelector('.ad-form');
   adForm.classList.remove('ad-form--disabled');
-  getErrorMessage();
+  setDisabledState();
+  getErrorMessage(ERROR_MESSAGE_GET);
 };
 
 map.on('load', () => {
